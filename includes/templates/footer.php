@@ -16,7 +16,6 @@
         $exists = file_exists( $file );
         
         if($exists){
-            echo $file;
             $ret = $file;
         } else {
             $exists = file_exists( $file );
