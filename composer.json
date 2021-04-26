@@ -1,0 +1,16 @@
+{
+    "name": "lauta/bienes-raices",
+    "description": "Creando un proyecto POO",
+    "authors": [
+        {
+            "name": "lautaromonteros",
+            "email": "lautaromonteros@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\" : "./clases"
+        }
+    }
+}

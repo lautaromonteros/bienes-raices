@@ -1,17 +1,24 @@
 <?php
 
-require 'app.php';
+define('TEMPLATES_URL', __DIR__ . '/templates');
+define('FUNCIONES_URL', __DIR__ . 'funciones.php');
+
 
 function incluirTemplate($nombreTemplate, $inicio = false){
     include TEMPLATES_URL  ."/${nombreTemplate}.php";
 }
 
-function estaAutenticado() : bool {
+function estaAutenticado() {
     session_start();
-    $aut = $_SESSION['login'];
     
-    if($aut){
-        return true;
+    if(!$_SESSION['login']){
+        header('Location: /');
     }
-    return false;
+}
+
+function debuguear($variable){
+    echo "<pre>";
+    var_dump($variable);
+    echo "</pre>";
+    exit;
 }
