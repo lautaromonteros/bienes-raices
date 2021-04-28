@@ -50,13 +50,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         //Guarda la imagen en el servidor
         $image->save($carpetaImagenes . $nombreImagen);
 
-        $resultado = $propiedad->guardar();    
-    
-        if($resultado){
-            //Redireccionar al usuario
-            
-            header('Location: ../?resultado=1');
-        }
+        $propiedad->guardar();    
     }
 }
 
