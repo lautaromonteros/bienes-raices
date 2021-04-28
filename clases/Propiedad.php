@@ -8,7 +8,10 @@ class Propiedad{
     protected static $db;
     protected static $columnasDB = ['id', 'titulo', 'precio', 'imagen', 'descripcion', 'habitaciones', 'wc', 'estacionamiento', 'creado', 'vendedorId'];
 
-    public $id, $titulo, $precio, $imagen, $descripcion, $habitaciones, $wc, $estacionamiento, $creado, $vendedorId;
+    //Validación
+    protected static $errores = [];
+
+    public $id, $titulo, $precio, $imagen, $descripcion, $habitaciones, $wc, $estacionamiento, $creado, $vendedorid;
 
     //Definir la conexion a bd
     public static function setDB($database){
@@ -19,25 +22,25 @@ class Propiedad{
         $this->id = $args['id'] ?? '';
         $this->titulo = $args['titulo'] ?? '';
         $this->precio = $args['precio'] ?? '';
-        $this->imagen = $args['imagen'] ?? 'imagen.jpg';
+        $this->imagen = $args['imagen'] ?? '';
         $this->descripcion = $args['descripcion'] ?? '';
         $this->habitaciones = $args['habitaciones'] ?? '';
         $this->wc = $args['wc'] ?? '';
         $this->estacionamiento = $args['estacionamiento'] ?? '';
         $this->creado = date('Y/m/d');
-        $this->vendedorId = $args['vendedorId'] ?? '';
+        $this->vendedorId = $args['vendedorId'] ?? 1;
     }
 
     public function guardar(){
         //Sanitizar entradas de datos
         $atributos = $this->sanitizarDatos();
-        debuguear($atributos);
 
-        $query = "INSERT INTO propiedades(titulo, precio, imagen, descripcion, habitaciones, wc, estacionamiento, creado, vendedorid) VALUES ('$this->titulo', '$this->precio', '$this->imagen', '$this->descripcion', '$this->habitaciones','$this->wc', '$this->estacionamiento', '$this->creado','$this->vendedorId');";
+        $query = "INSERT INTO propiedades(".join(', ', array_keys($atributos)) . ") VALUES ('" . join("', '", array_values($atributos)) . " ');";
 
         $resultado = self::$db->query($query);
 
-        debuguear($resultado);
+        return $resultado;
+
         
     }
 
@@ -58,5 +61,87 @@ class Propiedad{
             $sanitizado[$key] = self::$db->escape_string($value);
         }
         return $sanitizado;
+    }
+
+    //Subida de archivos
+    public function setImagen($imagen){
+        //Asignar al atributo imagen, el nombre de la imagen
+        if($imagen){
+            $this->imagen = $imagen;
+        }
+    }
+
+    //Validación
+    public static function getErrores(){
+        return self::$errores;
+    }
+
+    public function validar(){
+        if(!$this->titulo){
+            self::$errores[] = 'Debes añadir un titulo';
+        }
+        if(!$this->precio){
+            self::$errores[] = 'Debes añadir un precio';
+        }
+        if(strlen($this->descripcion)<50){
+            self::$errores[] = 'La descripcion es obligatoria y debe tener al menos 50 caracteres';
+        }
+        if(!$this->habitaciones){
+            self::$errores[] = 'Debes añadir la cantidad de habitaciones';
+        }
+        if(!$this->wc){
+            self::$errores[] = 'Debes añadir la cantidad de baños';
+        }
+        if(!$this->estacionamiento){
+            self::$errores[] = 'Debes añadir la cantidad de estacionamiento';
+        }
+        if(!$this->vendedorId){
+            self::$errores[] = 'Debes seleccionar un vendedor';
+        }
+        if(!$this->imagen){
+            self::$errores[] = 'La imagen es obligatoria';
+        }
+
+        return self::$errores;
+    }
+
+    //Lista todas las propiedades
+    public static function all(){
+        $query = "select * from propiedades";
+
+        $resultado = self::consultarSQL($query);
+
+        return $resultado;
+
+    }
+
+    protected static function consultarSQL($query){
+        // Consultar db
+        $resultado = self::$db->query($query);
+
+        //Iterar resultados
+        $array = [];
+        while($registro = $resultado->fetch_assoc()){
+            $array[] = self::crearObjeto($registro);
+        }
+
+        //Liberar la memoria
+        $resultado->free();
+
+        //retornar los resultados
+        return $array;
+    }
+
+    protected static function crearObjeto($registro){
+        $objeto = new self;
+
+        foreach ($registro as $key => $value) {
+            //debuguear($registro);
+            if(property_exists($objeto, $key)){
+                $objeto->$key = $value;
+            }
+        }
+
+        return $objeto;
     }
 }
