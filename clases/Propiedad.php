@@ -31,7 +31,39 @@ class Propiedad{
         $this->vendedorId = $args['vendedorId'] ?? 1;
     }
 
-    public function guardar(){
+    public function guardar() {
+        if(isset($this->id)){
+            $this->actualizar();
+        }else{
+            $this->crear();
+        }
+    }
+
+    public function actualizar(){
+        $atributos = $this->sanitizarDatos();
+
+        $valores = [];
+        foreach ($atributos as $key => $value) {
+            $valores[] = "{$key}='{$value}'";
+        }
+
+        $query = "UPDATE propiedades SET ";
+        $query.= join(', ', $valores);
+        $query.= " WHERE id = '" . self::$db->escape_string($this->id) ."'";
+        $query.= " LIMIT 1";
+
+        $resultado = self::$db->query($query);
+
+        if($resultado){
+            //Redireccionar al usuario
+            
+            header('Location: ../?resultado=2');
+        }
+
+
+    }
+
+    public function crear(){
         //Sanitizar entradas de datos
         $atributos = $this->sanitizarDatos();
 
@@ -65,6 +97,14 @@ class Propiedad{
 
     //Subida de archivos
     public function setImagen($imagen){
+        //Elimina la imagen previa
+        if(isset($this->id)){
+            $existeArchivo = file_exists(CARPETA_IMAGENES . $this->imagen);
+            if($existeArchivo){
+                unlink(CARPETA_IMAGENES . $this->imagen);
+            }
+        }
+
         //Asignar al atributo imagen, el nombre de la imagen
         if($imagen){
             $this->imagen = $imagen;
@@ -114,6 +154,15 @@ class Propiedad{
         return $resultado;
 
     }
+    
+    //Buscar propiedad por id
+    public static function find($id){
+        $query = "select * from propiedades where id = ${id}";
+
+        $resultado = self::consultarSQL($query);
+        
+        return array_shift($resultado);
+    }
 
     protected static function consultarSQL($query){
         // Consultar db
@@ -143,5 +192,14 @@ class Propiedad{
         }
 
         return $objeto;
+    }
+
+    //Sincronizar el objeto en memoria con los cambios realizados por el usuario
+    public function sincronizar($args = []){
+        foreach ($args as $key => $value) {
+            if(property_exists($this, $key) && !is_null(($value))){
+                $this->$key = $value;
+            }
+        }
     }
 }
