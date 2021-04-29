@@ -12,8 +12,6 @@ $propiedad = new Propiedad;
 // Consulta para tener todos los vendedores
 $vendedores = Vendedor::all();
 
-debuguear($vendedores);
-
 //Arreglo con mensajes de errores
 $errores = Propiedad::getErrores();
 

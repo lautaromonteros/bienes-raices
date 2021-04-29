@@ -52,7 +52,7 @@ class ActiveRecord {
         //Sanitizar entradas de datos
         $atributos = $this->sanitizarDatos();
 
-        $query = "INSERT INTO " . static::$tabla . "(".join(', ', array_keys($atributos)) . ") VALUES ('" . join("', '", array_values($atributos)) . " ');";
+        $query = "INSERT INTO " . static::$tabla . "(".join(', ', array_keys($atributos)) . ") VALUES ('" . join("', '", array_values($atributos)) . "');";
 
         $resultado = self::$db->query($query);
 
@@ -78,7 +78,7 @@ class ActiveRecord {
     //Identificar atributos
     public function atributos(){
         $atributos = [];
-        foreach (self::$columnasDB as $columna) {
+        foreach (static::$columnasDB as $columna) {
             if($columna === 'id') continue;
             $atributos[$columna] = $this->$columna;
         }
@@ -118,36 +118,12 @@ class ActiveRecord {
 
     //Validación
     public static function getErrores(){
-        return self::$errores;
+        return static::$errores;
     }
 
     public function validar(){
-        if(!$this->titulo){
-            self::$errores[] = 'Debes añadir un titulo';
-        }
-        if(!$this->precio){
-            self::$errores[] = 'Debes añadir un precio';
-        }
-        if(strlen($this->descripcion)<50){
-            self::$errores[] = 'La descripcion es obligatoria y debe tener al menos 50 caracteres';
-        }
-        if(!$this->habitaciones){
-            self::$errores[] = 'Debes añadir la cantidad de habitaciones';
-        }
-        if(!$this->wc){
-            self::$errores[] = 'Debes añadir la cantidad de baños';
-        }
-        if(!$this->estacionamiento){
-            self::$errores[] = 'Debes añadir la cantidad de estacionamiento';
-        }
-        if(!$this->vendedorId){
-            self::$errores[] = 'Debes seleccionar un vendedor';
-        }
-        if(!$this->imagen){
-            self::$errores[] = 'La imagen es obligatoria';
-        }
-
-        return self::$errores;
+        static::$errores = [];
+        return static::$errores;
     }
 
     //Lista todas las propiedades
@@ -176,7 +152,7 @@ class ActiveRecord {
         //Iterar resultados
         $array = [];
         while($registro = $resultado->fetch_assoc()){
-            $array[] = self::crearObjeto($registro);
+            $array[] = static::crearObjeto($registro);
         }
 
         //Liberar la memoria
